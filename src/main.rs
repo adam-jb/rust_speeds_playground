@@ -111,7 +111,7 @@ async fn main() -> Result<(), Error> {
     // Create client.
     let mut client = Client::default().await.unwrap();
 
-    
+    /*
     // Download the file from GCS
     let now = Instant::now();
     let data = client
@@ -146,7 +146,9 @@ async fn main() -> Result<(), Error> {
     };
     println!("Loading a string {:?}", now.elapsed());
     
-
+    */
+    
+    
     /// comment out the above and uncomment this to read from local file
     /*
     let now = Instant::now();
@@ -156,7 +158,7 @@ async fn main() -> Result<(), Error> {
     
     
     //// uncomment this section to load from string and save file
-    
+    /*
     print_type_of(&text);
     let first_50 = text.chars().take(50).collect::<String>();
     println!("First 50 characters: {}", first_50);
@@ -225,7 +227,7 @@ async fn main() -> Result<(), Error> {
     println!("Saving to GCS took {:?}", now.elapsed());
     
     
-    
+    */
     // read from GCS
     let now = Instant::now();
     let walking_network = client.download_object(&GetObjectRequest {
@@ -246,7 +248,7 @@ async fn main() -> Result<(), Error> {
             println!("Read from GCS and decoding took {:?}", now.elapsed());
                         
             
-            //// Benchmark djikstra
+            //// Benchmark djikstra. About 300k iters per worker per second
             let mut rng = WyRand::new();
             let now = Instant::now();
             let mut x = 0;
@@ -256,7 +258,7 @@ async fn main() -> Result<(), Error> {
                 x += results.len()
             }
             println!("Calculating routes took {:?}", now.elapsed());
-            println!("Total iters {:?}", x);
+            println!("Total nodes visited {:?}", x);
 
             
             
