@@ -51,8 +51,10 @@ struct Graph {
     edges_per_node: Vec<SmallVec<[EdgeOriginal; 4]>>,
 }
 
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    
     // Create client.
     let mut client = Client::default().await.unwrap();
 
@@ -71,6 +73,7 @@ async fn main() -> Result<(), Error> {
         .await;
     println!("Loading took {:?}", now.elapsed());
     print_type_of(&data);
+    
 
     // convert to text
     let now = Instant::now();
@@ -88,7 +91,18 @@ async fn main() -> Result<(), Error> {
         }
     };
     println!("Loading a string {:?}", now.elapsed());
+    
 
+    /// comment out the above and uncomment this to read from local file
+    /*
+    let now = Instant::now();
+    let text = std::fs::read_to_string("walk.txt").unwrap();
+    println!("Loading a string {:?}", now.elapsed());
+    */
+    
+    
+    //// uncomment this section to load from string and save file
+    /*
     print_type_of(&text);
     let first_50 = text.chars().take(50).collect::<String>();
     println!("First 50 characters: {}", first_50);
@@ -110,17 +124,16 @@ async fn main() -> Result<(), Error> {
     for (from, input_edges) in input {
         let mut edges = SmallVec::new();
         for array in input_edges {
-            /*
             /// larger graph with all 5 columns
-            edges.push(Edge {
-                to: NodeID(array[1] as u32),
-                cost: Cost(array[0] as u16),
-                additional1: Additional(array[2] as u16),
-                additional2: Additional(array[3] as u16),
-                additional3: Additional(array[4] as u16),
-            });
-            */
-            edges.push(EdgeOriginal {
+            //edges.push(Edge {
+            //    to: NodeID(array[1] as u32),
+            //    cost: Cost(array[0] as u16),
+            //    additional1: Additional(array[2] as u16),
+            //    additional2: Additional(array[3] as u16),
+            //    additional3: Additional(array[4] as u16),
+            //});
+
+        edges.push(EdgeOriginal {
                 to: NodeID(array[1] as u32),
                 cost: Cost(array[0] as u16),
             });
@@ -138,6 +151,8 @@ async fn main() -> Result<(), Error> {
     bincode::serialize_into(file, &graph).unwrap();
     println!("Saved to local storage {:?}", now.elapsed());
 
+    
+    
     ////Read in local file. 15s for Edge; 10s for EdgeOriginal
     println!("Loading graph");
     let now = Instant::now();
@@ -145,9 +160,42 @@ async fn main() -> Result<(), Error> {
     let graph: Graph = bincode::deserialize_from(file).unwrap();
     println!("Loading took {:?}", now.elapsed());
 
+    
     // upload to GCS
-
+    let now = Instant::now();
+    let uploaded = client.upload_object(&UploadObjectRequest {
+        bucket: "hack-bucket-8204707942".to_string(),
+        name: "graph.bin".to_string(),
+        ..Default::default()
+    },&bincode::serialize(&graph).unwrap(), "application/octet-stream", None).await;
+    println!("Saving to GCS took {:?}", now.elapsed());
+        
+    */
+    
     // read from GCS
+    let now = Instant::now();
+    let walking_network = client.download_object(&GetObjectRequest {
+        bucket: "hack-bucket-8204707942".to_string(),
+        object: "graph.bin".to_string(),
+        ..Default::default()
+   }, &Range::default(), None).await;
+    print_type_of(&walking_network);
+    println!("Read from GCS took {:?}", now.elapsed());
+    
+    /// 
+    
+    
+    
+    
+    /*
+    let now = Instant::now();
+    //let decoded_walking_network: Option<Graph> = bincode::deserialize(&walking_network[..]).unwrap();
+    let decoded_walking_network = bincode::deserialize(&walking_network).unwrap();
 
+    println!("decoding from GCS took {:?}", now.elapsed());
+    //println!("walking_network length {:?}", decoded_walking_network.len());
+    
+    */
+    
     Ok(())
 }
