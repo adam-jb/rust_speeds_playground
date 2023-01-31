@@ -48,7 +48,7 @@ struct EdgeOriginal {
 #[derive(Serialize, Deserialize)]
 struct Graph {
     // Index is NodeID
-    edges_per_node: Vec<SmallVec<[EdgeOriginal; 4]>>,
+    edges_per_node: Vec<SmallVec<[Edge; 4]>>,
 }
 
 
@@ -102,7 +102,7 @@ async fn main() -> Result<(), Error> {
     
     
     //// uncomment this section to load from string and save file
-    /*
+    
     print_type_of(&text);
     let first_50 = text.chars().take(50).collect::<String>();
     println!("First 50 characters: {}", first_50);
@@ -125,18 +125,18 @@ async fn main() -> Result<(), Error> {
         let mut edges = SmallVec::new();
         for array in input_edges {
             /// larger graph with all 5 columns
-            //edges.push(Edge {
-            //    to: NodeID(array[1] as u32),
-            //    cost: Cost(array[0] as u16),
-            //    additional1: Additional(array[2] as u16),
-            //    additional2: Additional(array[3] as u16),
-            //    additional3: Additional(array[4] as u16),
-            //});
-
-        edges.push(EdgeOriginal {
+            edges.push(Edge {
                 to: NodeID(array[1] as u32),
                 cost: Cost(array[0] as u16),
+                additional1: Additional(array[2] as u16),
+                additional2: Additional(array[3] as u16),
+                additional3: Additional(array[4] as u16),
             });
+
+        //edges.push(EdgeOriginal {
+        //        to: NodeID(array[1] as u32),
+        //        cost: Cost(array[0] as u16),
+        //    });
         }
 
         let from: usize = from.parse().unwrap();
@@ -159,7 +159,7 @@ async fn main() -> Result<(), Error> {
     let file = BufReader::new(File::open("graph.bin").unwrap());
     let graph: Graph = bincode::deserialize_from(file).unwrap();
     println!("Loading took {:?}", now.elapsed());
-
+    
     
     // upload to GCS
     let now = Instant::now();
@@ -169,8 +169,8 @@ async fn main() -> Result<(), Error> {
         ..Default::default()
     },&bincode::serialize(&graph).unwrap(), "application/octet-stream", None).await;
     println!("Saving to GCS took {:?}", now.elapsed());
-        
-    */
+    
+    
     
     // read from GCS
     let now = Instant::now();
@@ -183,29 +183,19 @@ async fn main() -> Result<(), Error> {
     println!("Read from GCS took {:?}", now.elapsed());
     
   
-        
-    /// to debug...
+    
+    /// to format to use
     let match_out = match walking_network {
-        Ok(v) => println!("working with version: {v:?}"),
+        Ok(v) => {
+            //println!("len of decoded {:?}", v.len()); 
+            //print_type_of(&v);
+            let decoded_walking_network: Graph = bincode::deserialize(&v).unwrap();
+        }, 
         Err(e) => println!("error parsing header: {e:?}"),
     };
+    println!("Read from GCS and decoding took {:?}", now.elapsed());
+    
+    
 
-    
-    /// 
-    bincode::serialize(&graph).unwrap()
-    
-    
-    
-    
-    /*
-    let now = Instant::now();
-    //let decoded_walking_network: Option<Graph> = bincode::deserialize(&walking_network[..]).unwrap();
-    let decoded_walking_network = bincode::deserialize(&walking_network).unwrap();
-
-    println!("decoding from GCS took {:?}", now.elapsed());
-    //println!("walking_network length {:?}", decoded_walking_network.len());
-    
-    */
-    
     Ok(())
 }
