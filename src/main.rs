@@ -182,7 +182,17 @@ async fn main() -> Result<(), Error> {
     print_type_of(&walking_network);
     println!("Read from GCS took {:?}", now.elapsed());
     
+  
+        
+    /// to debug...
+    let match_out = match walking_network {
+        Ok(v) => println!("working with version: {v:?}"),
+        Err(e) => println!("error parsing header: {e:?}"),
+    };
+
+    
     /// 
+    bincode::serialize(&graph).unwrap()
     
     
     

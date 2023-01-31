@@ -1,3 +1,5 @@
 *.bin
 target/*
 walk.txt
+walk_network_full.json
+
