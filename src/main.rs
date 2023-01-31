@@ -53,6 +53,7 @@ struct Graph {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    
     // Create client.
     let mut client = Client::default().await.unwrap();
 
@@ -72,6 +73,7 @@ async fn main() -> Result<(), Error> {
     println!("Loading took {:?}", now.elapsed());
     print_type_of(&data);
 
+
     // convert to text
     let now = Instant::now();
     let text = match data {
@@ -88,6 +90,15 @@ async fn main() -> Result<(), Error> {
         }
     };
     println!("Loading a string {:?}", now.elapsed());
+    
+
+    /// comment out the above and uncomment this to read from local file
+    /*
+    let now = Instant::now();
+    let text = std::fs::read_to_string("walk.txt").unwrap();
+    println!("Loading a string {:?}", now.elapsed());
+    */
+    
 
     print_type_of(&text);
     let first_50 = text.chars().take(50).collect::<String>();
